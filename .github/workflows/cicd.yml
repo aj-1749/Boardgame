@@ -21,9 +21,9 @@ jobs:
       run: mvn package --file pom.xml
     - uses: actions/checkout@v4
       with:
-        name: BoardGame-1
+        name: Board
         path: target/*.jar
 
     - name: Trivy FS Scan
       run: |
-        trivy fs --format table -o trivy-fs-report.html .
+        trivy fs --format table -o trivy-fs-report1.html .
