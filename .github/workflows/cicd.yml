@@ -21,9 +21,35 @@ jobs:
       run: mvn package --file pom.xml
     - uses: actions/checkout@v4
       with:
-        name: Board
+        name: Boardgame
         path: target/*.jar
 
     - name: Trivy FS Scan
       run: |
         trivy fs --format table -o trivy-fs-report1.html .
+    - name: SonarQube Scan
+      uses: sonarsource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    - name: Install jq
+      run: sudo apt-get update && apt-get install jq -y
+    - name: Sonarqube Quality Gate Check
+      id: Sonarqube-quality-gate-check
+      uses: sonarsource/sonarqube-quality-gate-action@master
+      timeout-minutes: 5
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-qemu-action@v3
+    - name: Build Docker Image
+      run: |
+        docker build -t hello8989/boardgitlab:latest .
+    - name: Trivy Image Scan
+      run: |
+        trivy image --format table -o trivy-report.html hello8989/boardgitlab:latest
+        
